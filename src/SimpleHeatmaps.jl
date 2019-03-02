@@ -1,7 +1,11 @@
 module SimpleHeatmaps
 
 export
-    matshow
+    current_colormap
+    set_colormap,
+    matshow,
+    openanim,
+    addframe
 
 
 include("matshow.jl")
