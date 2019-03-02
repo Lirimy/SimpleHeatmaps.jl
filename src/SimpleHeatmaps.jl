@@ -1,5 +1,9 @@
 module SimpleHeatmaps
 
-greet() = print("Hello World!")
+export
+    matshow
+
+
+include("matshow.jl")
 
 end # module
