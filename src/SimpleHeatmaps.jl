@@ -1,7 +1,7 @@
 module SimpleHeatmaps
 
 export
-    current_colormap
+    current_colormap,
     set_colormap,
     matshow,
     openanim,
