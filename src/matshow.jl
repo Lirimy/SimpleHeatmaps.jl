@@ -14,7 +14,7 @@ function set_colormap(cmap::AbstractVector)
 end
 
 
-function matshow(A::AbstractMatrix; f::Function=x->1+floor(Int, 256*x))
+function matshow(A::AbstractMatrix; f::Function=x->clamp(1+floor(Int, 256*x), 1, 256))
     IndirectArray(mappedarray(f, A), CURRENT_COLORMAP)
 end
 
