@@ -42,7 +42,7 @@ function Base.show(io::IO, ::MIME"text/html", anim::AnimationFile)
 end
 
 
-function addframe(io, img::ImageContainers{:jlc})
+function addframe(io, img::ImageContainer{:jlc})
     save(Stream(format"BMP", io), img.content)
 end
 
