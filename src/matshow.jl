@@ -15,7 +15,7 @@ end
 
 
 function matshow(A::AbstractMatrix; f::Function=x->clamp(1+floor(Int, 256*x), 1, 256))
-    ImageContainers{:jlc}(IndirectArray(mappedarray(f, A), CURRENT_COLORMAP))
+    ImageContainer{:jlc}(IndirectArray(mappedarray(f, A), CURRENT_COLORMAP))
 end
 
 
