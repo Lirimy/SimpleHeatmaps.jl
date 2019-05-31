@@ -2,7 +2,7 @@ import Colors: colormap
 import IndirectArrays: IndirectArray
 import MappedArrays: mappedarray
 import FileIO: open, close, save, @format_str, Stream
-
+import ImageContainers: ImageContainer
 
 const CURRENT_COLORMAP = colormap("Blues", 256)
 current_colormap() = CURRENT_COLORMAP
@@ -15,7 +15,7 @@ end
 
 
 function matshow(A::AbstractMatrix; f::Function=x->clamp(1+floor(Int, 256*x), 1, 256))
-    IndirectArray(mappedarray(f, A), CURRENT_COLORMAP)
+    ImageContainers{:jlc}(IndirectArray(mappedarray(f, A), CURRENT_COLORMAP))
 end
 
 
@@ -42,8 +42,8 @@ function Base.show(io::IO, ::MIME"text/html", anim::AnimationFile)
 end
 
 
-function addframe(io, img::AbstractMatrix)
-    save(Stream(format"BMP", io), img)
+function addframe(io, img::ImageContainers{:jlc})
+    save(Stream(format"BMP", io), img.content)
 end
 
 
