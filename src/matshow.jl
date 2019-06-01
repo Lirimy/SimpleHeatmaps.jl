@@ -19,48 +19,52 @@ function matshow(A::AbstractMatrix; f::Function=x->clamp(1+floor(Int, 256*x), 1,
 end
 
 
-get_extension(fn) = lowercase(Base.Filesystem.splitext(fn)[2][2:end])
-
-
-struct AnimationFile
-    filename::String
-end
-
-
-function Base.show(io::IO, ::MIME"text/html", anim::AnimationFile)
-    ext = get_extension(anim.filename)
-
-    if ext == "mp4"
-        write(io, "<video controls><source src=\"$(relpath(anim.filename))?$(rand())>\" type=\"video/mp4\"></video>")
-    elseif ext == "gif"
-        write(io, "<img src=\"$(relpath(anim.filename))?$(rand())>\" />")
-    else
-        error("Only support mp4/gif: $ext")
-    end
-    
-    nothing
-end
-
-
 function addframe(io, img::ImageContainer{:jlc})
     save(Stream(format"BMP", io), img.content)
 end
 
 
-function openanim(f::Function, filename::AbstractString="out.mp4")
-    filename = abspath(filename)
-    ext = get_extension(filename)
+function openanim(func::Function, fmt::Symbol=:gif)
+    fin = Pipe()
+    fout = IOBuffer()
     
-    if ext == "mp4"
-        open(f, `ffmpeg -v 0 -i pipe:0 -pix_fmt yuv420p -y $filename`, "w")
-        return AnimationFile(filename)
-    elseif ext == "gif"
+    if fmt == :mp4
+        fproc = run(
+            pipeline(`ffmpeg -v 0 -i - -pix_fmt yuv420p -f matroska -`,
+                stdin=fin, stdout=fout),
+            wait=false)
+        
+        try
+            func(fin)
+        finally
+            close(fin)
+        end
+        
+        wait(fproc)
+        close(fproc)
+        return ImageContainer{:mp4}(take!(fout))
+    
+    elseif fmt == :gif
         palette = tempname() * ".bmp"
         save(palette, IndirectArray(reshape(1:256, 16, 16)', SimpleHeatmaps.CURRENT_COLORMAP))
-        open(f, `ffmpeg -v 0 -i pipe:0 -i $palette -lavfi paletteuse=dither=sierra2_4a -y $filename`, "w")
-        return AnimationFile(filename)
+    
+        fproc = run(
+            pipeline(`ffmpeg -v 0 -i - -i $palette -lavfi paletteuse=dither=sierra2_4a -f gif -`,
+                stdin=fin, stdout=fout),
+            wait=false)
+        
+        try
+            func(fin)
+        finally
+            close(fin)
+        end
+        
+        wait(fproc)
+        close(fproc)
+        return ImageContainer{:gif}(take!(fout))
+    
     else
-        error("Only support mp4/gif: $ext")
+        error("Only support mp4 / gif: $fmt")
     end
 end
 
