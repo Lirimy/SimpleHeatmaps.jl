@@ -2,7 +2,7 @@ import FileIO: open, close, save, @format_str, Stream
 import IndirectArrays: IndirectArray
 import MappedArrays: mappedarray
 import Colors: colormap
-import ImageContainers: ImageContainer
+import ImageContainers: ImageContainer, storeimage
 
 const CURRENT_COLORMAP = colormap("Blues", 256)
 current_colormap() = CURRENT_COLORMAP
